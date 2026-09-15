@@ -32,6 +32,11 @@ def load_pickle(filename):
         return pickle.load(file)
 
 
+def is_voter_recorded(rows, voter_id):
+    """Return True when a data row already contains the voter identifier."""
+    return any(row and row[0] == voter_id for row in rows)
+
+
 def check_if_exists(value):
     """Return True when the voter identifier already has a recorded vote."""
     if not os.path.isfile(VOTES_FILE):
@@ -39,7 +44,8 @@ def check_if_exists(value):
 
     with open(VOTES_FILE, "r", newline="", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile)
-        return any(row and row[0] == value for row in reader)
+        next(reader, None)  # Skip the CSV header when it is present.
+        return is_voter_recorded(reader, value)
 
 
 def record_vote(voter_id, vote):
