@@ -38,14 +38,22 @@ def is_voter_recorded(rows, voter_id):
 
 
 def check_if_exists(value):
-    """Return True when the voter identifier already has a recorded vote."""
+    """Return True when the voter identifier already has a recorded vote.
+
+    Existing vote files may be headerless, while newly created files include
+    a header. Handle both formats so the first real vote is never skipped.
+    """
     if not os.path.isfile(VOTES_FILE):
         return False
 
     with open(VOTES_FILE, "r", newline="", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile)
-        next(reader, None)  # Skip the CSV header when it is present.
-        return is_voter_recorded(reader, value)
+        rows = list(reader)
+
+    if rows and rows[0] == COL_NAMES:
+        rows = rows[1:]
+
+    return is_voter_recorded(rows, value)
 
 
 def record_vote(voter_id, vote):
