@@ -13,6 +13,7 @@ from win32com.client import Dispatch
 DATA_DIR = "data"
 VOTES_FILE = "Votes.csv"
 CAMERA_INDEX = 0
+MIN_FACE_MATCH_CONFIDENCE = 0.6
 COL_NAMES = ["NAME", "VOTE", "DATE", "TIME"]
 VOTE_OPTIONS = {
     ord("1"): "BJP",
@@ -86,6 +87,18 @@ def load_classifier():
     return classifier
 
 
+def predict_voter(classifier, face_image):
+    """Return a voter ID only when the classifier is sufficiently confident."""
+    probabilities = classifier.predict_proba(face_image)[0]
+    best_index = int(np.argmax(probabilities))
+    confidence = float(probabilities[best_index])
+
+    if confidence < MIN_FACE_MATCH_CONFIDENCE:
+        return None
+
+    return str(classifier.classes_[best_index])
+
+
 def main():
     if not os.path.isdir(DATA_DIR):
         raise FileNotFoundError("The data directory is missing. Run add_faces.py first.")
@@ -111,19 +124,18 @@ def main():
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = facedetect.detectMultiScale(gray, 1.3, 5)
-            output = None
+            voter_id = None
 
             for (x, y, w, h) in faces:
                 crop_img = frame[y:y + h, x:x + w]
                 resized_img = cv2.resize(crop_img, (50, 50)).flatten().reshape(1, -1)
-                output = knn.predict(resized_img)
-                voter_id = str(output[0])
+                voter_id = predict_voter(knn, resized_img)
 
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (50, 50, 255), 2)
                 cv2.rectangle(frame, (x, y - 40), (x + w, y), (50, 50, 255), -1)
                 cv2.putText(
                     frame,
-                    voter_id,
+                    voter_id or "Unknown",
                     (x, y - 15),
                     cv2.FONT_HERSHEY_COMPLEX,
                     1,
@@ -135,12 +147,11 @@ def main():
             cv2.imshow("frame", img_background)
             key = cv2.waitKey(1) & 0xFF
 
-            if output is None:
+            if voter_id is None:
                 if key == ord("q"):
                     break
                 continue
 
-            voter_id = str(output[0])
             if check_if_exists(voter_id):
                 speak("YOU HAVE ALREADY VOTED")
                 break
