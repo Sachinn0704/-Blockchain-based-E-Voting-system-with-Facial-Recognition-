@@ -23,6 +23,7 @@ The system is designed to reduce duplicate or unauthorized voting by verifying a
 - Python 3.x
 - OpenCV for webcam capture and face recognition
 - NumPy for numerical processing
+- Scikit-learn KNN for voter classification
 - CSV and Python standard-library file handling
 - Pickle for local serialization
 
@@ -32,8 +33,21 @@ The system is designed to reduce duplicate or unauthorized voting by verifying a
 2. Store the generated face encodings and voter identifiers locally.
 3. Start the voting workflow with `give_vote.py`.
 4. Authenticate the voter using the captured face.
-5. Record the vote in `Votes.csv`.
-6. Use the stored records for result review or analysis.
+5. Accept the identity only when the classifier confidence reaches the configured minimum threshold.
+6. Check `Votes.csv` for an existing vote before accepting a new ballot.
+7. Record the vote in `Votes.csv`.
+8. Use the stored records for result review or analysis.
+
+## Authentication Safeguards
+
+The voting workflow includes several defensive checks before a ballot is recorded:
+
+- Face predictions below `MIN_FACE_MATCH_CONFIDENCE` are treated as unknown.
+- The voter identifier is checked against existing vote records to prevent repeat voting.
+- Both headerless legacy CSV files and newly created CSV files with headers are supported.
+- Missing face-data directories, invalid face/label datasets, unavailable webcams, and missing display assets fail with explicit errors.
+
+These safeguards make the prototype easier to demonstrate and reason about, while the project remains a local proof of concept rather than a production election system.
 
 ## How to Run
 
@@ -77,7 +91,9 @@ A working webcam is required for face capture and verification.
 ## Key Learning Outcomes
 
 - Computer-vision based authentication
+- Confidence-aware identity verification
 - Python file and data handling
+- Defensive validation of persisted data
 - Basic voter-verification workflow design
 - Separation of registration, authentication, voting, and analysis stages
 
