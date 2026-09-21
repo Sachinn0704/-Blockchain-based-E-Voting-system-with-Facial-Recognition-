@@ -49,6 +49,21 @@ The voting workflow includes several defensive checks before a ballot is recorde
 
 These safeguards make the prototype easier to demonstrate and reason about, while the project remains a local proof of concept rather than a production election system.
 
+## Threat Model and Limitations
+
+The prototype is designed to demonstrate the authentication workflow, not to provide a secure real-world election platform. The main risks and current mitigations are:
+
+| Risk | Current mitigation | Production requirement |
+|---|---|---|
+| Low-confidence face matches | Minimum confidence threshold | Calibrated biometric verification and liveness detection |
+| Repeat voting | Existing voter ID is checked before recording a ballot | Transaction-safe, server-side uniqueness constraints |
+| Local file tampering | Defensive file validation | Authenticated database storage and tamper-evident audit logs |
+| Exposure of biometric data | Local serialized storage only | Encryption at rest, strict access control, retention policy |
+| Device or webcam compromise | Basic runtime validation | Trusted hardware, secure deployment, and operational monitoring |
+| Unauthorized administration | No production admin model yet | Role-based access control and audited administrative actions |
+
+The system should therefore be treated as an educational prototype. It does not establish ballot secrecy, end-to-end election integrity, biometric liveness, secure key management, or the independent auditability expected from a production voting system.
+
 ## How to Run
 
 ### 1. Install dependencies
