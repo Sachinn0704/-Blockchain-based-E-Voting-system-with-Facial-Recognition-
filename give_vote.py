@@ -99,6 +99,11 @@ def predict_voter(classifier, face_image):
     return str(classifier.classes_[best_index])
 
 
+def get_vote_choice(key):
+    """Translate a keyboard key into a configured candidate choice."""
+    return VOTE_OPTIONS.get(key)
+
+
 def main():
     if not os.path.isdir(DATA_DIR):
         raise FileNotFoundError("The data directory is missing. Run add_faces.py first.")
@@ -156,8 +161,8 @@ def main():
                 speak("YOU HAVE ALREADY VOTED")
                 break
 
-            if key in VOTE_OPTIONS:
-                vote = VOTE_OPTIONS[key]
+            vote = get_vote_choice(key)
+            if vote:
                 record_vote(voter_id, vote)
                 speak("YOUR VOTE HAS BEEN RECORDED")
                 time.sleep(2)
