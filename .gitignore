@@ -1,0 +1,26 @@
+# Python cache and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Locally captured biometric data and generated model artifacts
+faces/
+captured_faces/
+*.pkl
+
+# Local exports and runtime logs
+*.log
+*.tmp
